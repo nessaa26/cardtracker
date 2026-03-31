@@ -38,7 +38,7 @@ export default function ImportExportPanel({
         const incoming = validateImport(raw)
         const merged = mergeEntries(entries, incoming)
         onImport(merged)
-        onSuccess(`Imported ${incoming.length} entries (${merged.length - entries.length > 0 ? merged.length - entries.length : 0} new, merged total: ${merged.length}).`)
+        onSuccess(`Imported ${incoming.length} entries (${Math.max(0, merged.length - entries.length)} new, merged total: ${merged.length}).`)
       } catch (err) {
         onError(`Import failed: ${err instanceof Error ? err.message : 'Unknown error'}`)
       }

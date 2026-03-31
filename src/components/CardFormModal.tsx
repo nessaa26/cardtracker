@@ -105,7 +105,7 @@ export default function CardFormModal({ entry, onSave, onClose }: CardFormModalP
       productUrl: form.productUrl?.trim() || undefined,
       status: form.status,
       lastChecked: form.lastChecked,
-      price: form.price != null && form.price !== undefined ? Number(form.price) : undefined,
+      price: form.price != null ? Number(form.price) : undefined,
       currency: form.currency?.trim() || undefined,
       notes: form.notes?.trim() || undefined,
       createdAt: entry?.createdAt ?? now,
