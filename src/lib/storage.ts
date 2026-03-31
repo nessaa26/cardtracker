@@ -1,8 +1,10 @@
 import type { CardReleaseEntry } from '../types'
 import seedData from '../data/seed.json'
+import communityData from '../data/community.json'
 
 const STORAGE_KEY = 'pct.entries.v1'
 const SCHEMA_VERSION = 1
+const COMMUNITY_URL = 'https://raw.githubusercontent.com/nessaa26/cardtracker/main/src/data/community.json'
 
 interface StoragePayload {
   version: number
@@ -33,18 +35,48 @@ function migrate(raw: unknown): CardReleaseEntry[] {
   return []
 }
 
+function mergeById(local: CardReleaseEntry[], remote: CardReleaseEntry[]): CardReleaseEntry[] {
+  const map = new Map<string, CardReleaseEntry>()
+  for (const e of local) map.set(e.id, e)
+  for (const e of remote) {
+    const existing = map.get(e.id)
+    if (!existing || e.updatedAt > existing.updatedAt) {
+      map.set(e.id, { ...e, game: e.game ?? 'pokemon' })
+    }
+  }
+  return Array.from(map.values())
+}
+
 export function loadEntries(): CardReleaseEntry[] {
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
     if (raw === null) {
+      // First run: merge seed + bundled community data
       const seed = seedData as CardReleaseEntry[]
-      saveEntries(seed)
-      return seed
+      const community = communityData as CardReleaseEntry[]
+      const merged = mergeById(seed, community)
+      saveEntries(merged)
+      return merged
     }
     const parsed: unknown = JSON.parse(raw)
-    return migrate(parsed)
+    const local = migrate(parsed)
+    // Also merge bundled community data
+    const community = communityData as CardReleaseEntry[]
+    return mergeById(local, community)
   } catch {
     return seedData as CardReleaseEntry[]
+  }
+}
+
+export async function fetchCommunityUpdates(): Promise<CardReleaseEntry[]> {
+  try {
+    const res = await fetch(COMMUNITY_URL, { cache: 'no-store' })
+    if (!res.ok) return []
+    const data = await res.json()
+    if (!Array.isArray(data)) return []
+    return data.map((e: CardReleaseEntry) => ({ ...e, game: e.game ?? 'pokemon' }))
+  } catch {
+    return []
   }
 }
 
@@ -58,8 +90,10 @@ export function saveEntries(entries: CardReleaseEntry[]): void {
 
 export function resetToSeed(): CardReleaseEntry[] {
   const seed = seedData as CardReleaseEntry[]
-  saveEntries(seed)
-  return seed
+  const community = communityData as CardReleaseEntry[]
+  const merged = mergeById(seed, community)
+  saveEntries(merged)
+  return merged
 }
 
 export function exportEntries(entries: CardReleaseEntry[]): void {

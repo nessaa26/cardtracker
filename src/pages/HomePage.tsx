@@ -1,6 +1,6 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import type { CardReleaseEntry, FilterState, ToastMessage } from '../types'
-import { loadEntries, saveEntries } from '../lib/storage'
+import { loadEntries, saveEntries, fetchCommunityUpdates } from '../lib/storage'
 import { filterAndSort, getUniqueRetailers } from '../lib/filters'
 import { useDebouncedValue } from '../hooks/useDebouncedValue'
 import { generateId } from '../lib/id'
@@ -44,6 +44,36 @@ export default function HomePage() {
   const addToast = useCallback((message: string, type: ToastMessage['type'] = 'success') => {
     const id = generateId()
     setToasts((prev) => [...prev, { id, message, type }])
+  }, [])
+
+  // Fetch community updates on mount and every 60 seconds
+  useEffect(() => {
+    let active = true
+    async function sync() {
+      const remote = await fetchCommunityUpdates()
+      if (!active || remote.length === 0) return
+      setEntries((prev) => {
+        const map = new Map<string, CardReleaseEntry>()
+        for (const e of prev) map.set(e.id, e)
+        let added = 0
+        for (const e of remote) {
+          const existing = map.get(e.id)
+          if (!existing || e.updatedAt > existing.updatedAt) {
+            map.set(e.id, e)
+            if (!existing) added++
+          }
+        }
+        const merged = Array.from(map.values())
+        if (added > 0 || merged.length !== prev.length) {
+          saveEntries(merged)
+          return merged
+        }
+        return prev
+      })
+    }
+    sync()
+    const interval = setInterval(sync, 60_000)
+    return () => { active = false; clearInterval(interval) }
   }, [])
 
   const dismissToast = useCallback((id: string) => {
