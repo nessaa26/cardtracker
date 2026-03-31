@@ -6,6 +6,11 @@ export function filterAndSort(
 ): CardReleaseEntry[] {
   let result = [...entries]
 
+  // Game filter
+  if (filters.game) {
+    result = result.filter((e) => e.game === filters.game)
+  }
+
   // Search by product name
   if (filters.search.trim()) {
     const q = filters.search.trim().toLowerCase()

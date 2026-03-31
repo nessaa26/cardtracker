@@ -15,12 +15,19 @@ function migrate(raw: unknown): CardReleaseEntry[] {
   // v1 schema
   const payload = raw as StoragePayload
   if (payload.version === SCHEMA_VERSION && Array.isArray(payload.entries)) {
-    return payload.entries
+    // Add game field to entries missing it (migration from pre-game era)
+    return payload.entries.map((e: CardReleaseEntry) => ({
+      ...e,
+      game: e.game ?? 'pokemon',
+    }))
   }
 
   // Legacy: flat array without versioning
   if (Array.isArray(raw)) {
-    return raw as CardReleaseEntry[]
+    return (raw as CardReleaseEntry[]).map((e) => ({
+      ...e,
+      game: e.game ?? 'pokemon',
+    }))
   }
 
   return []
@@ -30,7 +37,6 @@ export function loadEntries(): CardReleaseEntry[] {
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
     if (raw === null) {
-      // First run: seed localStorage
       const seed = seedData as CardReleaseEntry[]
       saveEntries(seed)
       return seed
@@ -62,7 +68,7 @@ export function exportEntries(entries: CardReleaseEntry[]): void {
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
   a.href = url
-  a.download = `pct-export-${new Date().toISOString().slice(0, 10)}.json`
+  a.download = `card-tracker-export-${new Date().toISOString().slice(0, 10)}.json`
   a.click()
   URL.revokeObjectURL(url)
 }

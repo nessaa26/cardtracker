@@ -8,8 +8,11 @@ export type AvailabilityStatus =
 
 export type Region = 'US' | 'CA' | 'EU' | 'UK' | 'JP' | 'AU' | 'OTHER'
 
+export type CardGame = 'pokemon' | 'one_piece'
+
 export interface CardReleaseEntry {
   id: string
+  game: CardGame
   productName: string
   setOrSeries: string
   releaseDate: string        // ISO yyyy-mm-dd
@@ -30,6 +33,7 @@ export type SortDirection = 'asc' | 'desc'
 
 export interface FilterState {
   search: string
+  game: CardGame | ''
   region: Region | ''
   retailer: string
   status: AvailabilityStatus | ''

@@ -1,5 +1,6 @@
 import type { CardReleaseEntry } from '../types'
 import StatusBadge from './StatusBadge'
+import GameBadge from './GameBadge'
 import { formatDate } from '../lib/date'
 
 interface CardRowProps {
@@ -18,31 +19,34 @@ export default function CardRow({
   onDelete,
 }: CardRowProps) {
   return (
-    <tr className="bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-      <td className="px-4 py-3">
+    <tr className="bg-white/60 dark:bg-gray-900/40 hover:bg-indigo-50/50 dark:hover:bg-indigo-900/20 transition-colors row-glow">
+      <td className="px-4 py-3.5">
+        <GameBadge game={entry.game} />
+      </td>
+      <td className="px-4 py-3.5">
         <button
           onClick={() => onView(entry)}
-          className="font-medium text-indigo-600 dark:text-indigo-400 hover:underline text-left max-w-xs truncate block"
+          className="font-semibold text-gray-900 dark:text-gray-100 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors text-left max-w-xs truncate block"
           title={entry.productName}
         >
           {entry.productName}
         </button>
       </td>
-      <td className="px-4 py-3 text-gray-600 dark:text-gray-400 max-w-[140px] truncate">
+      <td className="px-4 py-3.5 text-gray-500 dark:text-gray-400 max-w-[140px] truncate">
         {entry.setOrSeries}
       </td>
-      <td className="px-4 py-3">
-        <span className="text-xs font-medium bg-indigo-50 dark:bg-indigo-900 text-indigo-700 dark:text-indigo-300 px-2 py-0.5 rounded">
+      <td className="px-4 py-3.5">
+        <span className="text-xs font-medium bg-indigo-50 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 px-2 py-0.5 rounded-full">
           {entry.region}
         </span>
       </td>
-      <td className="px-4 py-3 text-gray-600 dark:text-gray-400">
+      <td className="px-4 py-3.5 text-gray-500 dark:text-gray-400">
         {entry.productUrl ? (
           <a
             href={entry.productUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="hover:underline text-indigo-600 dark:text-indigo-400"
+            className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors underline decoration-dotted underline-offset-2"
             title={entry.retailer}
           >
             {entry.retailer}
@@ -51,45 +55,42 @@ export default function CardRow({
           entry.retailer
         )}
       </td>
-      <td className="px-4 py-3 text-gray-600 dark:text-gray-400 whitespace-nowrap">
+      <td className="px-4 py-3.5 text-gray-500 dark:text-gray-400 whitespace-nowrap">
         {formatDate(entry.releaseDate)}
       </td>
-      <td className="px-4 py-3">
+      <td className="px-4 py-3.5">
         <StatusBadge status={entry.status} />
       </td>
-      <td className="px-4 py-3 text-gray-600 dark:text-gray-400 whitespace-nowrap">
-        {formatDate(entry.lastChecked)}
-      </td>
-      <td className="px-4 py-3 text-gray-600 dark:text-gray-400 whitespace-nowrap">
+      <td className="px-4 py-3.5 text-gray-500 dark:text-gray-400 whitespace-nowrap font-medium">
         {entry.price != null ? `${entry.currency ?? ''} ${entry.price}` : '—'}
       </td>
-      <td className="px-4 py-3">
-        <div className="flex items-center gap-2 justify-center">
+      <td className="px-4 py-3.5">
+        <div className="flex items-center gap-1 justify-center">
           <button
             onClick={() => onView(entry)}
             title="View details"
-            className="p-1 text-gray-500 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+            className="p-1.5 rounded-lg text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:text-indigo-400 dark:hover:bg-indigo-900/30 transition-all"
           >
             👁
           </button>
           <button
             onClick={() => onEdit(entry)}
             title="Edit"
-            className="p-1 text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+            className="p-1.5 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:text-blue-400 dark:hover:bg-blue-900/30 transition-all"
           >
             ✏️
           </button>
           <button
             onClick={() => onDuplicate(entry)}
             title="Duplicate"
-            className="p-1 text-gray-500 hover:text-green-600 dark:hover:text-green-400 transition-colors"
+            className="p-1.5 rounded-lg text-gray-400 hover:text-green-600 hover:bg-green-50 dark:hover:text-green-400 dark:hover:bg-green-900/30 transition-all"
           >
             📋
           </button>
           <button
             onClick={() => onDelete(entry)}
             title="Delete"
-            className="p-1 text-gray-500 hover:text-red-600 dark:hover:text-red-400 transition-colors"
+            className="p-1.5 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:text-red-400 dark:hover:bg-red-900/30 transition-all"
           >
             🗑️
           </button>

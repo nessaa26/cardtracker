@@ -16,6 +16,7 @@ import ConfirmDialog from '../components/ConfirmDialog'
 
 const DEFAULT_FILTERS: FilterState = {
   search: '',
+  game: '',
   region: '',
   retailer: '',
   status: '',
@@ -35,7 +36,10 @@ export default function HomePage() {
   const effectiveFilters = { ...filters, search: debouncedSearch }
   const filtered = filterAndSort(entries, effectiveFilters)
   const retailers = getUniqueRetailers(entries)
-  const hasFilters = !!(filters.search || filters.region || filters.retailer || filters.status)
+  const hasFilters = !!(filters.search || filters.game || filters.region || filters.retailer || filters.status)
+
+  const pokemonCount = entries.filter(e => e.game === 'pokemon').length
+  const onePieceCount = entries.filter(e => e.game === 'one_piece').length
 
   const addToast = useCallback((message: string, type: ToastMessage['type'] = 'success') => {
     const id = generateId()
@@ -92,7 +96,19 @@ export default function HomePage() {
 
   return (
     <>
-      <div className="space-y-4">
+      <div className="space-y-5">
+        {/* Stats bar */}
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="flex items-center gap-2">
+            <div className="bg-gradient-to-r from-amber-50 to-amber-100 dark:from-amber-900/20 dark:to-amber-800/20 border border-amber-200/60 dark:border-amber-700/40 rounded-xl px-3 py-2">
+              <span className="text-xs text-amber-600 dark:text-amber-400 font-medium">⚡ Pokémon: {pokemonCount}</span>
+            </div>
+            <div className="bg-gradient-to-r from-red-50 to-red-100 dark:from-red-900/20 dark:to-red-800/20 border border-red-200/60 dark:border-red-700/40 rounded-xl px-3 py-2">
+              <span className="text-xs text-red-600 dark:text-red-400 font-medium">☠️ One Piece: {onePieceCount}</span>
+            </div>
+          </div>
+        </div>
+
         {/* Top bar */}
         <div className="flex flex-wrap items-center gap-3">
           <div className="flex-1 min-w-[200px]">
@@ -103,7 +119,7 @@ export default function HomePage() {
           </div>
           <button
             onClick={() => setEditEntry(null)}
-            className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors whitespace-nowrap"
+            className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl text-sm font-medium hover:from-indigo-700 hover:to-purple-700 transition-all shadow-md hover:shadow-lg whitespace-nowrap"
           >
             + Add Entry
           </button>
@@ -118,7 +134,7 @@ export default function HomePage() {
 
         {/* Count */}
         <p className="text-sm text-gray-500 dark:text-gray-400">
-          Showing <span className="font-semibold text-gray-700 dark:text-gray-300">{filtered.length}</span> of {entries.length} entries
+          Showing <span className="font-bold text-gray-700 dark:text-gray-300">{filtered.length}</span> of {entries.length} entries
         </p>
 
         {/* Table or empty */}

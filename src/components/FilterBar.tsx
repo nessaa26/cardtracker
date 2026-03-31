@@ -1,4 +1,10 @@
-import type { FilterState, Region, AvailabilityStatus, SortField } from '../types'
+import type { FilterState, Region, AvailabilityStatus, SortField, CardGame } from '../types'
+
+const GAMES: { value: CardGame | ''; label: string }[] = [
+  { value: '', label: '🎴 All Games' },
+  { value: 'pokemon', label: '⚡ Pokémon TCG' },
+  { value: 'one_piece', label: '☠️ One Piece TCG' },
+]
 
 const REGIONS: { value: Region | ''; label: string }[] = [
   { value: '', label: 'All Regions' },
@@ -39,95 +45,116 @@ export default function FilterBar({ filters, onChange, retailerOptions }: Filter
     onChange({ ...filters, [key]: value })
 
   const selectClass =
-    'border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-sm px-2 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500'
+    'border border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-sm px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent shadow-sm transition-shadow hover:shadow-md'
+
+  const hasActiveFilters = !!(filters.game || filters.region || filters.retailer || filters.status)
 
   return (
-    <div className="flex flex-wrap gap-2 items-center">
-      {/* Region */}
-      <select
-        value={filters.region}
-        onChange={(e) => set('region', e.target.value as Region | '')}
-        className={selectClass}
-        aria-label="Filter by region"
-      >
-        {REGIONS.map((r) => (
-          <option key={r.value} value={r.value}>
-            {r.label}
-          </option>
-        ))}
-      </select>
-
-      {/* Retailer */}
-      <select
-        value={filters.retailer}
-        onChange={(e) => set('retailer', e.target.value)}
-        className={selectClass}
-        aria-label="Filter by retailer"
-      >
-        <option value="">All Retailers</option>
-        {retailerOptions.map((r) => (
-          <option key={r} value={r}>
-            {r}
-          </option>
-        ))}
-      </select>
-
-      {/* Status */}
-      <select
-        value={filters.status}
-        onChange={(e) => set('status', e.target.value as AvailabilityStatus | '')}
-        className={selectClass}
-        aria-label="Filter by status"
-      >
-        {STATUSES.map((s) => (
-          <option key={s.value} value={s.value}>
-            {s.label}
-          </option>
-        ))}
-      </select>
-
-      {/* Sort field */}
-      <select
-        value={filters.sortField}
-        onChange={(e) => set('sortField', e.target.value as SortField)}
-        className={selectClass}
-        aria-label="Sort by"
-      >
-        {SORT_FIELDS.map((f) => (
-          <option key={f.value} value={f.value}>
-            {f.label}
-          </option>
-        ))}
-      </select>
-
-      {/* Sort direction */}
-      <button
-        onClick={() =>
-          set('sortDirection', filters.sortDirection === 'asc' ? 'desc' : 'asc')
-        }
-        className="border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-sm px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-        aria-label="Toggle sort direction"
-        title={filters.sortDirection === 'asc' ? 'Sort descending' : 'Sort ascending'}
-      >
-        {filters.sortDirection === 'asc' ? '↑ Asc' : '↓ Desc'}
-      </button>
-
-      {/* Clear filters */}
-      {(filters.region || filters.retailer || filters.status) && (
-        <button
-          onClick={() =>
-            onChange({
-              ...filters,
-              region: '',
-              retailer: '',
-              status: '',
-            })
-          }
-          className="text-sm text-indigo-600 dark:text-indigo-400 hover:underline"
+    <div className="bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm rounded-2xl border border-gray-200/60 dark:border-gray-700/60 p-4 shadow-sm">
+      <div className="flex flex-wrap gap-2.5 items-center">
+        {/* Game */}
+        <select
+          value={filters.game}
+          onChange={(e) => set('game', e.target.value as CardGame | '')}
+          className={selectClass}
+          aria-label="Filter by game"
         >
-          Clear filters
-        </button>
-      )}
+          {GAMES.map((g) => (
+            <option key={g.value} value={g.value}>
+              {g.label}
+            </option>
+          ))}
+        </select>
+
+        {/* Region */}
+        <select
+          value={filters.region}
+          onChange={(e) => set('region', e.target.value as Region | '')}
+          className={selectClass}
+          aria-label="Filter by region"
+        >
+          {REGIONS.map((r) => (
+            <option key={r.value} value={r.value}>
+              {r.label}
+            </option>
+          ))}
+        </select>
+
+        {/* Retailer */}
+        <select
+          value={filters.retailer}
+          onChange={(e) => set('retailer', e.target.value)}
+          className={selectClass}
+          aria-label="Filter by retailer"
+        >
+          <option value="">All Retailers</option>
+          {retailerOptions.map((r) => (
+            <option key={r} value={r}>
+              {r}
+            </option>
+          ))}
+        </select>
+
+        {/* Status */}
+        <select
+          value={filters.status}
+          onChange={(e) => set('status', e.target.value as AvailabilityStatus | '')}
+          className={selectClass}
+          aria-label="Filter by status"
+        >
+          {STATUSES.map((s) => (
+            <option key={s.value} value={s.value}>
+              {s.label}
+            </option>
+          ))}
+        </select>
+
+        <div className="flex items-center gap-2 ml-auto">
+          {/* Sort field */}
+          <select
+            value={filters.sortField}
+            onChange={(e) => set('sortField', e.target.value as SortField)}
+            className={selectClass}
+            aria-label="Sort by"
+          >
+            {SORT_FIELDS.map((f) => (
+              <option key={f.value} value={f.value}>
+                ↕ {f.label}
+              </option>
+            ))}
+          </select>
+
+          {/* Sort direction */}
+          <button
+            onClick={() =>
+              set('sortDirection', filters.sortDirection === 'asc' ? 'desc' : 'asc')
+            }
+            className="border border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-sm px-3 py-2.5 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all shadow-sm hover:shadow-md"
+            aria-label="Toggle sort direction"
+            title={filters.sortDirection === 'asc' ? 'Sort descending' : 'Sort ascending'}
+          >
+            {filters.sortDirection === 'asc' ? '↑ Asc' : '↓ Desc'}
+          </button>
+
+          {/* Clear filters */}
+          {hasActiveFilters && (
+            <button
+              onClick={() =>
+                onChange({
+                  ...filters,
+                  game: '',
+                  region: '',
+                  retailer: '',
+                  status: '',
+                })
+              }
+              className="text-sm text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 font-medium transition-colors"
+            >
+              ✕ Clear
+            </button>
+          )}
+        </div>
+      </div>
     </div>
   )
 }

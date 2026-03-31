@@ -7,7 +7,7 @@ interface ToastProps {
 }
 
 const TYPE_CLASS = {
-  success: 'bg-green-600 text-white',
+  success: 'bg-emerald-600 text-white',
   error: 'bg-red-600 text-white',
   info: 'bg-indigo-600 text-white',
 }
@@ -20,7 +20,7 @@ function Toast({ toast, onDismiss }: { toast: ToastMessage; onDismiss: (id: stri
 
   return (
     <div
-      className={`flex items-center gap-3 px-4 py-3 rounded-lg shadow-lg text-sm font-medium ${TYPE_CLASS[toast.type]} animate-in slide-in-from-bottom`}
+      className={`flex items-center gap-3 px-4 py-3 rounded-xl shadow-lg text-sm font-medium ${TYPE_CLASS[toast.type]} animate-slide-up backdrop-blur-sm`}
       role="alert"
     >
       <span className="flex-1">{toast.message}</span>

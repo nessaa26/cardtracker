@@ -1,5 +1,8 @@
 import type { CardReleaseEntry } from '../types'
 import CardRow from './CardRow'
+import GameBadge from './GameBadge'
+import StatusBadge from './StatusBadge'
+import { formatDate } from '../lib/date'
 
 interface CardTableProps {
   entries: CardReleaseEntry[]
@@ -19,22 +22,22 @@ export default function CardTable({
   return (
     <>
       {/* Desktop table */}
-      <div className="hidden md:block overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700">
+      <div className="hidden md:block overflow-x-auto rounded-2xl border border-gray-200/60 dark:border-gray-700/60 shadow-sm bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm">
         <table className="w-full text-sm text-left">
-          <thead className="bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 uppercase text-xs">
+          <thead className="bg-gray-50/80 dark:bg-gray-900/50 text-gray-500 dark:text-gray-400 uppercase text-xs tracking-wider">
             <tr>
-              <th className="px-4 py-3">Product</th>
-              <th className="px-4 py-3">Set/Series</th>
-              <th className="px-4 py-3">Region</th>
-              <th className="px-4 py-3">Retailer</th>
-              <th className="px-4 py-3">Release Date</th>
-              <th className="px-4 py-3">Status</th>
-              <th className="px-4 py-3">Last Checked</th>
-              <th className="px-4 py-3">Price</th>
-              <th className="px-4 py-3 text-center">Actions</th>
+              <th className="px-4 py-3.5">Game</th>
+              <th className="px-4 py-3.5">Product</th>
+              <th className="px-4 py-3.5">Set/Series</th>
+              <th className="px-4 py-3.5">Region</th>
+              <th className="px-4 py-3.5">Retailer</th>
+              <th className="px-4 py-3.5">Release Date</th>
+              <th className="px-4 py-3.5">Status</th>
+              <th className="px-4 py-3.5">Price</th>
+              <th className="px-4 py-3.5 text-center">Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+          <tbody className="divide-y divide-gray-100 dark:divide-gray-700/50">
             {entries.map((entry) => (
               <CardRow
                 key={entry.id}
@@ -54,60 +57,55 @@ export default function CardTable({
         {entries.map((entry) => (
           <div
             key={entry.id}
-            className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 shadow-sm"
+            className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-gray-200/60 dark:border-gray-700/60 rounded-2xl p-4 shadow-sm card-hover"
           >
             <div className="flex items-start justify-between gap-2">
-              <div>
+              <div className="space-y-1.5">
+                <GameBadge game={entry.game} />
                 <h3 className="font-semibold text-gray-900 dark:text-gray-100 text-sm">
                   {entry.productName}
                 </h3>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                <p className="text-xs text-gray-500 dark:text-gray-400">
                   {entry.setOrSeries}
                 </p>
               </div>
-              <div className="flex-shrink-0">
-                <span className="text-xs font-medium bg-indigo-50 dark:bg-indigo-900 text-indigo-700 dark:text-indigo-300 px-2 py-0.5 rounded">
+              <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
+                <span className="text-xs font-medium bg-indigo-50 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 px-2 py-0.5 rounded-full">
                   {entry.region}
                 </span>
+                <StatusBadge status={entry.status} />
               </div>
             </div>
 
-            <div className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-gray-600 dark:text-gray-400">
-              <span>🏪 {entry.retailer}</span>
-              <span>📅 {entry.releaseDate}</span>
-              <span>🔍 {entry.lastChecked}</span>
+            <div className="mt-3 grid grid-cols-2 gap-x-4 gap-y-1.5 text-xs text-gray-600 dark:text-gray-400">
+              <span className="flex items-center gap-1">🏪 {entry.retailer}</span>
+              <span className="flex items-center gap-1">📅 {formatDate(entry.releaseDate)}</span>
               {entry.price != null && (
-                <span>
+                <span className="flex items-center gap-1">
                   💰 {entry.currency} {entry.price}
                 </span>
               )}
             </div>
 
-            <div className="mt-2 flex items-center justify-between">
-              <div>
-                {/* StatusBadge imported inline to avoid circular deps */}
-                <span className="text-xs">{entry.status.replace('_', ' ')}</span>
-              </div>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => onView(entry)}
-                  className="text-xs text-indigo-600 dark:text-indigo-400 hover:underline"
-                >
-                  View
-                </button>
-                <button
-                  onClick={() => onEdit(entry)}
-                  className="text-xs text-gray-600 dark:text-gray-400 hover:underline"
-                >
-                  Edit
-                </button>
-                <button
-                  onClick={() => onDelete(entry)}
-                  className="text-xs text-red-600 dark:text-red-400 hover:underline"
-                >
-                  Delete
-                </button>
-              </div>
+            <div className="mt-3 pt-3 border-t border-gray-100 dark:border-gray-700/50 flex items-center justify-end gap-3">
+              <button
+                onClick={() => onView(entry)}
+                className="text-xs font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 transition-colors"
+              >
+                View
+              </button>
+              <button
+                onClick={() => onEdit(entry)}
+                className="text-xs font-medium text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition-colors"
+              >
+                Edit
+              </button>
+              <button
+                onClick={() => onDelete(entry)}
+                className="text-xs font-medium text-red-500 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 transition-colors"
+              >
+                Delete
+              </button>
             </div>
           </div>
         ))}

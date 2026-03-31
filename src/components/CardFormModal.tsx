@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
-import type { CardReleaseEntry, AvailabilityStatus, Region } from '../types'
+import type { CardReleaseEntry, AvailabilityStatus, Region, CardGame } from '../types'
 import { today, nowISO } from '../lib/date'
 import { generateId } from '../lib/id'
 import StatusBadge from './StatusBadge'
+import GameBadge from './GameBadge'
 
 const STATUSES: AvailabilityStatus[] = [
   'rumored',
@@ -14,6 +15,7 @@ const STATUSES: AvailabilityStatus[] = [
 ]
 
 const REGIONS: Region[] = ['US', 'CA', 'EU', 'UK', 'JP', 'AU', 'OTHER']
+const GAMES: CardGame[] = ['pokemon', 'one_piece']
 
 interface CardFormModalProps {
   entry?: CardReleaseEntry | null
@@ -24,6 +26,7 @@ interface CardFormModalProps {
 type FormData = Omit<CardReleaseEntry, 'id' | 'createdAt' | 'updatedAt'>
 
 const DEFAULT_FORM: FormData = {
+  game: 'pokemon',
   productName: '',
   setOrSeries: '',
   releaseDate: '',
@@ -39,6 +42,7 @@ const DEFAULT_FORM: FormData = {
 
 function toFormData(entry: CardReleaseEntry): FormData {
   return {
+    game: entry.game,
     productName: entry.productName,
     setOrSeries: entry.setOrSeries,
     releaseDate: entry.releaseDate,
@@ -79,7 +83,6 @@ export default function CardFormModal({ entry, onSave, onClose }: CardFormModalP
     if (!form.retailer.trim()) e.retailer = 'Retailer is required.'
     if (!form.releaseDate) e.releaseDate = 'Release date is required.'
     if (!form.lastChecked) e.lastChecked = 'Last checked date is required.'
-    // ISO date format validation
     if (form.releaseDate && !/^\d{4}-\d{2}-\d{2}$/.test(form.releaseDate)) {
       e.releaseDate = 'Use format YYYY-MM-DD.'
     }
@@ -97,6 +100,7 @@ export default function CardFormModal({ entry, onSave, onClose }: CardFormModalP
     const now = nowISO()
     const saved: CardReleaseEntry = {
       id: entry?.id ?? generateId(),
+      game: form.game,
       productName: form.productName.trim(),
       setOrSeries: form.setOrSeries.trim(),
       releaseDate: form.releaseDate,
@@ -115,29 +119,29 @@ export default function CardFormModal({ entry, onSave, onClose }: CardFormModalP
   }
 
   const inputClass = (err?: string) =>
-    `w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-800 ${
+    `w-full border rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-gray-800 transition-shadow shadow-sm hover:shadow-md ${
       err
         ? 'border-red-400 dark:border-red-500'
-        : 'border-gray-300 dark:border-gray-600'
+        : 'border-gray-200 dark:border-gray-600'
     }`
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
       onClick={onClose}
     >
       <div
-        className="bg-white dark:bg-gray-900 rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+        className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto animate-fade-in border border-gray-200/50 dark:border-gray-700/50"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
+        <div className="flex items-center justify-between p-6 border-b border-gray-100 dark:border-gray-800">
           <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
             {entry ? 'Edit Entry' : 'Add Entry'}
           </h2>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+            className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
             aria-label="Close"
           >
             ✕
@@ -146,6 +150,29 @@ export default function CardFormModal({ entry, onSave, onClose }: CardFormModalP
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
+          {/* Game Selection */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Card Game <span className="text-red-500">*</span>
+            </label>
+            <div className="flex gap-3">
+              {GAMES.map((g) => (
+                <button
+                  key={g}
+                  type="button"
+                  onClick={() => set('game', g)}
+                  className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium border-2 transition-all ${
+                    form.game === g
+                      ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/30 shadow-md'
+                      : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
+                  }`}
+                >
+                  <GameBadge game={g} size="sm" />
+                </button>
+              ))}
+            </div>
+          </div>
+
           {/* Product Name */}
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -156,7 +183,7 @@ export default function CardFormModal({ entry, onSave, onClose }: CardFormModalP
               value={form.productName}
               onChange={(e) => set('productName', e.target.value)}
               className={inputClass(errors.productName)}
-              placeholder="e.g. Scarlet & Violet Booster Box"
+              placeholder={form.game === 'pokemon' ? 'e.g. Scarlet & Violet Booster Box' : 'e.g. OP-05 Booster Box'}
             />
             {errors.productName && (
               <p className="text-red-500 text-xs mt-1">{errors.productName}</p>
@@ -173,7 +200,7 @@ export default function CardFormModal({ entry, onSave, onClose }: CardFormModalP
               value={form.setOrSeries}
               onChange={(e) => set('setOrSeries', e.target.value)}
               className={inputClass(errors.setOrSeries)}
-              placeholder="e.g. Scarlet & Violet"
+              placeholder={form.game === 'pokemon' ? 'e.g. Scarlet & Violet' : 'e.g. Awakening of the New Era'}
             />
             {errors.setOrSeries && (
               <p className="text-red-500 text-xs mt-1">{errors.setOrSeries}</p>
@@ -265,7 +292,7 @@ export default function CardFormModal({ entry, onSave, onClose }: CardFormModalP
               value={form.retailer}
               onChange={(e) => set('retailer', e.target.value)}
               className={inputClass(errors.retailer)}
-              placeholder="e.g. Amazon, Pokemon Center"
+              placeholder="e.g. Amazon, Pokemon Center, TCGPlayer"
             />
             {errors.retailer && (
               <p className="text-red-500 text-xs mt-1">{errors.retailer}</p>
@@ -336,17 +363,17 @@ export default function CardFormModal({ entry, onSave, onClose }: CardFormModalP
           </div>
 
           {/* Actions */}
-          <div className="flex items-center gap-3 pt-2">
+          <div className="flex items-center gap-3 pt-3">
             <button
               type="submit"
-              className="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors"
+              className="flex-1 px-4 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl text-sm font-medium hover:from-indigo-700 hover:to-purple-700 transition-all shadow-md hover:shadow-lg"
             >
               {entry ? 'Save Changes' : 'Add Entry'}
             </button>
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+              className="px-4 py-2.5 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-xl text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-800 transition-all"
             >
               Cancel
             </button>
